@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .edit-card {
+        background-color: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(5px);
+        border-radius: 1rem;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+        padding: 2rem;
+        max-width: 800px;
+        margin: auto;
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #007bff;
+        margin-bottom: 1rem;
+    }
+
+    .qa-row .form-control {
+        font-size: 0.9rem;
+    }
+
+    .btn-outline-secondary.btn-sm {
+        font-size: 0.8rem;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="edit-card">
+        <h3 class="text-center mb-4">Edit Item: <span class="text-primary">{{ item.title }}</span></h3>
+
+        <form method="POST" enctype="multipart/form-data">
+            <!-- Basic Info -->
+            <div class="section-title">Basic Info</div>
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input type="text" class="form-control" name="title" value="{{ item.title }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" name="description" rows="3" required>{{ item.description }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Type</label>
+                <select class="form-select" name="item_type" id="item_type" required onchange="toggleQA()">
+                    <option value="lost" {% if item.item_type == 'lost' %}selected{% endif %}>Lost</option>
+                    <option value="found" {% if item.item_type == 'found' %}selected{% endif %}>Found</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Category</label>
+                <select class="form-select" name="category" required>
+                    <option value="electronics" {% if item.category == 'electronics' %}selected{% endif %}>Electronics</option>
+                    <option value="documents" {% if item.category == 'documents' %}selected{% endif %}>Documents</option>
+                    <option value="accessories" {% if item.category == 'accessories' %}selected{% endif %}>Accessories</option>
+                    <option value="clothing" {% if item.category == 'clothing' %}selected{% endif %}>Clothing</option>
+                    <option value="other" {% if item.category == 'other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Contact Info</label>
+                <input type="text" class="form-control" name="contact_info" value="{{ item.contact_info }}" required>
+            </div>
+
+            <!-- Security Questions -->
+            <div class="section-title">Security Questions & Answers</div>
+            <div id="qa-section">
+                {% for i in range(item.questions|length) %}
+                <div class="row g-2 mb-2 qa-row">
+                    <div class="col-md-6">
+                        <input type="text" name="questions[]" class="form-control" value="{{ item.questions[i] }}" placeholder="Enter question" required>
+                    </div>
+                    <div class="col-md-6 answer-field">
+                        <input type="text" name="answers[]" class="form-control" value="{{ item.answers[i] }}" placeholder="Enter answer" required>
+                    </div>
+                </div>
+                {% endfor %}
+                <button type="button" class="btn btn-outline-secondary btn-sm mb-3" onclick="addQA()">+ Add More</button>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="section-title">Item Image</div>
+            {% if item.image_filename %}
+            <div class="mb-3">
+                <img src="{{ url_for('static', filename='uploads/' + item.image_filename) }}" alt="Item image" class="img-fluid mb-2 rounded" style="max-height: 200px;">
+            </div>
+            {% endif %}
+            <div class="mb-4">
+                <label class="form-label">Upload New Image (optional)</label>
+                <input type="file" class="form-control" name="image">
+            </div>
+
+            <!-- Submit -->
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Update Item</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function addQA() {
+        const container = document.getElementById('qa-section');
+        const div = document.createElement('div');
+        div.className = 'row g-2 mb-2 qa-row';
+        div.innerHTML = `
+            <div class="col-md-6">
+                <input type="text" name="questions[]" class="form-control" placeholder="Enter question" required>
+            </div>
+            <div class="col-md-6 answer-field">
+                <input type="text" name="answers[]" class="form-control" placeholder="Enter answer" required>
+            </div>
+        `;
+        container.insertBefore(div, container.lastElementChild);
+        toggleQA();
+    }
+
+    function toggleQA() {
+        const itemType = document.getElementById('item_type').value;
+        const answerFields = document.querySelectorAll('.answer-field input');
+
+        if (itemType === 'found') {
+            answerFields.forEach(input => {
+                input.value = '';
+                input.required = false;
+                input.closest('.answer-field').style.display = 'none';
+            });
+        } else {
+            answerFields.forEach(input => {
+                input.required = true;
+                input.closest('.answer-field').style.display = '';
+            });
+        }
+    }
+
+    window.onload = toggleQA;
+</script>
+{% endblock %}

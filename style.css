@@ -1,0 +1,49 @@
+/* --- Global Style Guide for Lost & Found Website --- */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+.card {
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border: none;
+}
+
+.text-muted {
+    color: #6c757d;
+}
+
+.rounded {
+    border-radius: 0.75rem !important;
+}
+
+/* Keep or enhance other useful styles */
+.question-group {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+
+
+
+
+body {
+    background: linear-gradient(135deg, #f2f4f7, #dee4ea);
+    background-attachment: fixed;
+    background-size: cover;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

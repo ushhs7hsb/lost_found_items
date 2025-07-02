@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .admin-card {
+        background-color: #ffffff;
+        border-radius: 1rem;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+        padding: 2rem;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    .btn-group-sm > .btn {
+        padding: 0.3rem 0.6rem;
+    }
+
+    .action-col {
+        min-width: 220px;
+    }
+</style>
+
+<div class="container py-4">
+    <h2 class="mb-4 text-center">Admin Dashboard</h2>
+
+    <div class="admin-card mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">All Posted Items</h5>
+            <a href="{{ url_for('post_item') }}" class="btn btn-success btn-sm">+ Create New</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Posted By</th>
+                        <th>Posted On</th>
+                        <th>Status</th>
+                        <th class="action-col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.title }}</td>
+                        <td>
+                            <span class="badge {% if item.item_type == 'lost' %}bg-danger{% else %}bg-success{% endif %}">
+                                {{ item.item_type|capitalize }}
+                            </span>
+                        </td>
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.owner.username }}</td>
+                        <td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            {% if item.claimed %}
+                                <span class="badge bg-success">Claimed</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Active</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin_edit_item', item_id=item.id) }}" class="btn btn-primary">Edit</a>
+                                <button class="btn btn-danger delete-item" data-id="{{ item.id }}">Delete</button>
+                                <button class="btn {% if item.claimed %}btn-success{% else %}btn-warning{% endif %} toggle-claim"
+                                        data-id="{{ item.id }}">
+                                    {% if item.claimed %}Unclaim{% else %}Claim{% endif %}
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <h5 class="mb-3">All Registered Users</h5>
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <span class="badge {% if user.is_admin %}bg-primary{% else %}bg-secondary{% endif %}">
+                                {% if user.is_admin %}Admin{% else %}User{% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.delete-item').forEach(button => {
+        button.addEventListener('click', function () {
+            const itemId = this.getAttribute('data-id');
+            if (confirm('Are you sure you want to delete this item?')) {
+                fetch(`/admin/delete_item/${itemId}`, { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => data.success ? location.reload() : alert(data.message));
+            }
+        });
+    });
+
+    document.querySelectorAll('.toggle-claim').forEach(button => {
+        button.addEventListener('click', function () {
+            const itemId = this.getAttribute('data-id');
+            fetch(`/admin/toggle_claim/${itemId}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => data.success ? location.reload() : alert(data.message));
+        });
+    });
+});
+</script>
+{% endblock %}

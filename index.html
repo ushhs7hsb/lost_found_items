@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .card {
+        background-color: #ffffffd9;
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 1rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-img-container {
+        background-color: rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    #noResults {
+        background-color: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(3px);
+    }
+</style>
+
+<div class="container">
+    <div class="row g-3 mb-4 align-items-end">
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Search Items</label>
+            <input type="text" class="form-control" id="searchInput" placeholder="Search by title or description...">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Filter by Category</label>
+            <select class="form-select" id="categoryFilter">
+                <option value="">All Categories</option>
+                <option value="electronics">Electronics</option>
+                <option value="documents">Documents</option>
+                <option value="clothing">Clothing</option>
+                <option value="accessories">Accessories</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row g-4" id="itemList">
+        {% for item in items %}
+        <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 item-card"
+             data-title="{{ item.title.lower() }}"
+             data-description="{{ item.description.lower() }}"
+             data-category="{{ item.category.lower() }}">
+            <div class="card h-100">
+                {% if item.claimed %}
+                <div class="position-absolute top-0 start-0 w-100 bg-success text-white text-center py-1 rounded-top">
+                    CLAIMED
+                </div>
+                {% endif %}
+                {% if item.image_filename %}
+                <div class="card-img-container ratio ratio-1x1">
+                    <img src="{{ url_for('static', filename='uploads/' + item.image_filename) }}"
+                         class="card-img-top img-fluid p-2"
+                         alt="{{ item.title }}"
+                         style="object-fit: contain;">
+                </div>
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title fw-semibold">{{ item.title }}</h6>
+                    <p class="card-text text-muted small flex-grow-1">{{ item.description|truncate(60) }}</p>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-secondary">{{ item.category|capitalize }}</span>
+                        <span class="badge {% if item.item_type == 'lost' %}bg-danger{% else %}bg-success{% endif %}">
+                            {{ item.item_type|capitalize }}
+                        </span>
+                    </div>
+                    <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-sm btn-primary w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="noResults" class="alert alert-warning text-center mt-4 d-none">
+        No items found matching your criteria.
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const itemCards = document.querySelectorAll('.item-card');
+    const noResultsMessage = document.getElementById('noResults');
+
+    function filterItems() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        const selectedCategory = categoryFilter.value.toLowerCase();
+        let visibleCount = 0;
+
+        itemCards.forEach(card => {
+            const title = card.dataset.title;
+            const description = card.dataset.description;
+            const category = card.dataset.category;
+
+            const matchesSearch = searchTerm === '' || title.includes(searchTerm) || description.includes(searchTerm);
+            const matchesCategory = selectedCategory === '' || category === selectedCategory;
+
+            if (matchesSearch && matchesCategory) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        noResultsMessage.classList.toggle('d-none', visibleCount > 0);
+    }
+
+    searchInput.addEventListener('input', () => setTimeout(filterItems, 200));
+    categoryFilter.addEventListener('change', filterItems);
+
+    filterItems();
+});
+</script>
+{% endblock %}

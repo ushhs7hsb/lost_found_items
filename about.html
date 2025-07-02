@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 🫧 Floating Bubbles Background -->
+<div class="bubbles-bg"></div>
+
+<style>
+    body {
+        background: linear-gradient(to bottom, #e9f7ff, #ffffff);
+        overflow-x: hidden;
+    }
+
+    .bubbles-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: -1;
+    }
+
+    .bubbles-bg::before,
+    .bubbles-bg::after {
+        content: '';
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background-image: radial-gradient(circle, rgba(0, 123, 255, 0.1) 8%, transparent 10%),
+                          radial-gradient(circle, rgba(40, 167, 69, 0.1) 6%, transparent 10%);
+        background-size: 80px 80px;
+        animation: moveBubbles 60s linear infinite;
+    }
+
+    .bubbles-bg::after {
+        background-size: 100px 100px;
+        animation-delay: 30s;
+    }
+
+    @keyframes moveBubbles {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-25%); }
+    }
+
+    .about-wrapper {
+        background-color: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(5px);
+        border-radius: 1rem;
+        padding: 2rem;
+        max-width: 900px;
+    }
+
+    .about-wrapper h1 {
+        font-weight: 700;
+    }
+
+    .about-wrapper p {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .img-fluid {
+        border-radius: 1rem;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<div class="container-fluid vh-100 d-flex flex-column justify-content-center align-items-center p-0 m-0">
+    <div class="about-wrapper text-center">
+        <h1 class="fw-bold text-primary mb-4">About Us</h1>
+        <h5 class="text-dark">Welcome to <span class="text-success">Lost & Found Network</span></h5>
+        <p class="text-muted mt-4">
+            <strong>Lost & Found Network</strong> is a platform designed to help people reunite with their lost items.
+            Whether you've lost something precious or found an item that belongs to someone else,
+            our platform makes it easy to connect and return items to their rightful owners.
+        </p>
+        <p class="text-muted">
+            Our mission is to create a community where people can help each other by posting lost and found items,
+            answering security questions, and sharing contact information securely.
+        </p>
+        <p class="text-muted">
+            Thank you for being a part of our community! 🙌
+        </p>
+        <div class="text-center mt-4">
+            <img src="https://th.bing.com/th/id/OIP.vS4vTV5cO7wUx8hp_xrKawHaHa?rs=1&pid=ImgDetMain"
+                 alt="Lost and Found" class="img-fluid" style="max-width: 400px;">
+        </div>
+    </div>
+</div>
+{% endblock %}

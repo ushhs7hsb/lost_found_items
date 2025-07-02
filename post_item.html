@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  body {
+    background: linear-gradient(to bottom, #e9f0fb, #ffffff);
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+  }
+
+  .animal-card-wrapper {
+    position: relative;
+    max-width: 600px;
+    margin: 6rem auto 4rem;
+  }
+
+  /* Bigger Animal Face on top, centered */
+  .animal-face {
+    position: absolute;
+    top: -190px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    z-index: 10;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+    border-radius: 50%;
+  }
+
+  /* Card container */
+  .form-wrapper {
+    position: relative;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow:
+      0 8px 16px rgba(0, 0, 0, 0.12),
+      0 4px 6px rgba(0, 0, 0, 0.06);
+    padding: 2rem 3rem;
+    z-index: 5;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .form-wrapper:hover {
+    box-shadow:
+      0 12px 24px rgba(0, 0, 0, 0.18),
+      0 6px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Hands on left and right side of the card */
+  .hand {
+    position: absolute;
+    top: 40px;
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(145deg, #f0f0f0, #d9d9d9);
+    border-radius: 50%;
+    box-shadow:
+      inset 3px 3px 7px #bebebe,
+      inset -3px -3px 7px #ffffff,
+      0 5px 12px rgba(0, 0, 0, 0.12);
+    z-index: 15;
+    transition: background 0.3s ease;
+  }
+
+  .hand.left {
+    left: -50px;
+    transform: rotate(-15deg);
+  }
+
+  .hand.right {
+    right: -50px;
+    transform: rotate(15deg);
+  }
+
+  .hand:hover {
+    background: linear-gradient(145deg, #e2e2e2, #c7c7c7);
+  }
+
+  .form-wrapper h4 {
+    text-align: center;
+    color: #0056b3;
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  label.form-label {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #444;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 0.6rem;
+    border: 1.5px solid #ccc;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.35);
+    outline: none;
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 90px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(90deg, #0069d9, #0053ba);
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0.75rem;
+    transition: background 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(90deg, #004a99, #003d7a);
+  }
+
+  .btn-outline-secondary {
+    border-radius: 0.6rem;
+    font-weight: 600;
+  }
+
+  /* QA pairs layout fix */
+  #qa-container .qa-pair {
+    align-items: center;
+  }
+
+  @media (max-width: 640px) {
+    .animal-card-wrapper {
+      margin: 8rem 1rem 4rem;
+      max-width: 100%;
+    }
+
+    .animal-face {
+      width: 180px;
+      top: -150px;
+    }
+
+    .hand.left {
+      left: -35px;
+      width: 60px;
+      height: 60px;
+    }
+
+    .hand.right {
+      right: -35px;
+      width: 60px;
+      height: 60px;
+    }
+
+    .form-wrapper {
+      padding: 1.5rem 1.5rem;
+    }
+  }
+</style>
+
+<div class="container position-relative" style="z-index: 1;">
+  <div class="animal-card-wrapper">
+    <!-- Animal Face -->
+    <img
+      src="https://cdn-icons-png.flaticon.com/512/616/616408.png"
+      alt="Cute Dog Face"
+      class="animal-face"
+    />
+
+    <!-- Left Hand -->
+    <div class="hand left"></div>
+
+    <!-- Right Hand -->
+    <div class="hand right"></div>
+
+    <!-- The Form Card -->
+    <div class="form-wrapper">
+      <h4>Post a Lost or Found Item</h4>
+      <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="item_type" class="form-label">Type</label>
+          <select
+            class="form-select"
+            name="item_type"
+            id="item_type"
+            required
+            onchange="toggleAnswers()"
+          >
+            <option value="lost">Lost</option>
+            <option value="found">Found</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          <input
+            type="text"
+            class="form-control"
+            name="title"
+            placeholder="e.g. Lost Wallet"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea
+            class="form-control"
+            name="description"
+            rows="3"
+            placeholder="Describe the item..."
+            required
+          ></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Category</label>
+          <select class="form-select" name="category" required>
+            <option value="electronics">Electronics</option>
+            <option value="documents">Documents</option>
+            <option value="accessories">Accessories</option>
+            <option value="clothing">Clothing</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Contact Info</label>
+          <input
+            type="text"
+            class="form-control"
+            name="contact_info"
+            placeholder="Email or phone number"
+            required
+          />
+        </div>
+
+        <div id="qa-section" class="mb-3">
+          <label class="form-label">Security Questions (for Lost Items)</label>
+          <div id="qa-container">
+            <div class="row g-2 mb-2 qa-pair">
+              <div class="col-6">
+                <input
+                  type="text"
+                  name="questions[]"
+                  class="form-control"
+                  placeholder="Question"
+                  required
+                />
+              </div>
+              <div class="col-6 answer-field">
+                <input
+                  type="text"
+                  name="answers[]"
+                  class="form-control"
+                  placeholder="Answer"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            onclick="addQA()"
+          >
+            + Add More
+          </button>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Image (optional)</label>
+          <input type="file" class="form-control" name="image" />
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary">Post Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function addQA() {
+    const container = document.getElementById("qa-container");
+    const div = document.createElement("div");
+    div.className = "row g-2 mb-2 qa-pair";
+    div.innerHTML = `
+      <div class="col-6">
+          <input type="text" name="questions[]" class="form-control" placeholder="Question" required>
+      </div>
+      <div class="col-6 answer-field">
+          <input type="text" name="answers[]" class="form-control" placeholder="Answer" required>
+      </div>
+    `;
+    container.appendChild(div);
+    toggleAnswers();
+  }
+
+  function toggleAnswers() {
+    const itemType = document.getElementById("item_type").value;
+    const answerFields = document.querySelectorAll(".answer-field input");
+
+    if (itemType === "found") {
+      answerFields.forEach((input) => {
+        input.value = "";
+        input.required = false;
+        input.closest(".answer-field").style.display = "none";
+      });
+    } else {
+      answerFields.forEach((input) => {
+        input.required = true;
+        input.closest(".answer-field").style.display = "";
+      });
+    }
+  }
+
+  window.onload = toggleAnswers;
+</script>
+{% endblock %}

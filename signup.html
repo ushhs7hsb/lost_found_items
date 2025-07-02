@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="particles-js" style="position: fixed; width: 100%; height: 100%; z-index: -1;"></div>
+
+<style>
+    body {
+        background: linear-gradient(to bottom, #ffffff, #000000);
+        background-attachment: fixed;
+        background-size: cover;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .auth-wrapper {
+        animation: fadeIn 0.6s ease-in-out;
+    }
+
+    .auth-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+        color: #212529;
+    }
+
+    .auth-header {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        background-color: rgba(255, 255, 255, 0.6);
+        border-radius: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+        0% {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+
+<div class="container py-5 position-relative auth-wrapper" style="z-index: 1;">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="auth-card">
+                <div class="text-center auth-header">Join the Community 🧭</div>
+                <form method="POST" action="{{ url_for('signup', next=request.args.get('next')) }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Create a strong password" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 fw-semibold">Sign Up</button>
+                </form>
+                <div class="mt-3 text-center">
+                    Already have an account? <a href="{{ url_for('login', next=request.args.get('next')) }}">Log in</a>
+                </div>
+                {% if request.args.get('next') %}
+                <div class="mt-3 text-muted small text-center">
+                    Sign up to access the requested page.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 50 },
+            color: { value: '#28a745' },
+            shape: { type: 'circle' },
+            opacity: { value: 0.5 },
+            size: { value: 3 },
+            line_linked: {
+                enable: true,
+                distance: 150,
+                color: '#28a745',
+                opacity: 0.4,
+                width: 1
+            }
+        },
+        interactivity: {
+            detect_on: 'canvas',
+            events: {
+                onhover: { enable: true, mode: 'repulse' },
+                onclick: { enable: true, mode: 'push' }
+            }
+        },
+        retina_detect: true
+    });
+</script>
+{% endblock %}

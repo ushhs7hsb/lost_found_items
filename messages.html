@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  body {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Overlay with subtle abstract shapes */
+  body::before {
+    content: "";
+    position: fixed;
+    top: -50px;
+    left: -50px;
+    width: 300vw;
+    height: 300vh;
+    background: radial-gradient(circle at 20% 20%, rgba(255 255 255 / 0.15), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(255 255 255 / 0.1), transparent 50%);
+    filter: blur(80px);
+    z-index: -1;
+  }
+
+  .message-card {
+    border-radius: 1.25rem;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    margin: 2rem auto 4rem;
+    background: rgba(255 255 255 / 0.9);
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    overflow: hidden;
+    backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid rgba(255 255 255 / 0.4);
+  }
+
+  .message-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid #007bff;
+    background: linear-gradient(90deg, #0056b3, #007bff);
+    color: white;
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-align: center;
+    user-select: none;
+  }
+
+  .messages-container {
+    flex-grow: 1;
+    padding: 1.5rem 2rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    scroll-behavior: smooth;
+    background: transparent;
+  }
+
+  .chat-bubble {
+    max-width: 65%;
+    padding: 1rem 1.25rem;
+    border-radius: 1.5rem;
+    position: relative;
+    word-wrap: break-word;
+    font-size: 1rem;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    transition: background-color 0.3s ease;
+  }
+
+  .chat-left {
+    background-color: #f1f3f5;
+    align-self: flex-start;
+    border-bottom-left-radius: 0.2rem;
+    color: #333;
+  }
+
+  .chat-right {
+    background-color: #d1e7dd;
+    align-self: flex-end;
+    border-bottom-right-radius: 0.2rem;
+    color: #1e4620;
+  }
+
+  .chat-bubble:hover {
+    filter: brightness(0.95);
+  }
+
+  .chat-sender {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+    opacity: 0.85;
+  }
+
+  .chat-time {
+    font-size: 0.7rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+    text-align: right;
+  }
+
+  /* Scrollbar styling for messages */
+  .messages-container::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .messages-container::-webkit-scrollbar-thumb {
+    background-color: #007bff99;
+    border-radius: 10px;
+  }
+
+  .messages-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Form styling */
+  .form-section {
+    border-top: 1px solid #dee2e6;
+    padding: 1.5rem 2rem;
+    background: transparent;
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 90px;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+    border: 1.5px solid #ced4da;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background: rgba(255 255 255 / 0.8);
+    backdrop-filter: blur(8px);
+  }
+
+  textarea.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.35);
+    outline: none;
+    background: rgba(255 255 255 / 0.95);
+  }
+
+  .btn-success {
+    background: linear-gradient(90deg, #198754, #146c43);
+    border: none;
+    border-radius: 1rem;
+    padding: 0.75rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: background 0.3s ease;
+    box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3);
+  }
+
+  .btn-success:hover {
+    background: linear-gradient(90deg, #146c43, #0f5132);
+  }
+
+  /* No messages alert */
+  .alert-no-messages {
+    padding: 2rem;
+    font-size: 1.1rem;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+  }
+
+  /* Unauthorized alert */
+  .alert-danger {
+    margin: 3rem auto;
+    max-width: 600px;
+    font-size: 1.2rem;
+  }
+
+  @media (max-width: 768px) {
+    .message-card {
+      height: 90vh;
+      max-width: 100%;
+      margin: 1rem 0 2rem;
+    }
+
+    .message-header {
+      font-size: 1.25rem;
+      padding: 1rem 1.5rem;
+    }
+
+    .form-section {
+      padding: 1rem 1.5rem;
+    }
+
+    textarea.form-control {
+      font-size: 0.95rem;
+    }
+  }
+</style>
+
+<div class="message-card">
+  <div class="message-header">Messages for "{{ item.title }}"</div>
+
+  {% if current_user.id == item.user_id or current_user.id == item.allowed_user_id %}
+  <div class="messages-container" id="messagesContainer">
+    {% if messages %}
+      {% for message in messages %}
+      <div class="chat-bubble {% if message.sender_id == current_user.id %}chat-right{% else %}chat-left{% endif %}">
+        <div class="chat-sender">
+          {% if message.sender_id == current_user.id %}You{% else %}{{ message.sender.username }}{% endif %}
+        </div>
+        <div class="chat-content">{{ message.content }}</div>
+        <div class="chat-time">{{ message.timestamp.strftime('%Y-%m-%d %H:%M') }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="alert-no-messages">No messages yet. Start the conversation below!</div>
+    {% endif %}
+  </div>
+
+  <div class="form-section">
+    <form id="sendMessageForm">
+      <input type="hidden" name="receiver_id" value="{% if current_user.id == item.user_id %}{{ item.allowed_user_id }}{% else %}{{ item.user_id }}{% endif %}">
+      <input type="hidden" name="item_id" value="{{ item.id }}">
+      <div class="mb-3">
+        <textarea name="content" class="form-control" rows="3" placeholder="Type your message..." required></textarea>
+      </div>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-success">Send Message</button>
+      </div>
+    </form>
+  </div>
+  {% else %}
+  <div class="alert alert-danger text-center mx-auto mt-5" style="max-width: 600px;">
+    You are not authorized to view these messages.
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  // Scroll to bottom of messages container on page load
+  const messagesContainer = document.getElementById('messagesContainer');
+  if (messagesContainer) {
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  document.getElementById('sendMessageForm')?.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    fetch("{{ url_for('send_message') }}", {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        this.reset();
+        window.location.reload();
+      } else {
+        alert('Failed to send message: ' + data.message);
+      }
+    });
+  });
+</script>
+{% endblock %}

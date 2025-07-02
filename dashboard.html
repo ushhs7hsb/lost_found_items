@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 💡 Animated Gradient Background -->
+<div class="glow-background"></div>
+
+<style>
+    body {
+        background: #f8f9fa;
+        overflow-x: hidden;
+    }
+
+    .glow-background {
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        z-index: -1;
+        background: radial-gradient(circle at 30% 30%, #00c6ff44, transparent 50%),
+                    radial-gradient(circle at 70% 60%, #28a74533, transparent 60%),
+                    radial-gradient(circle at 50% 80%, #007bff33, transparent 70%);
+        animation: pulseGradient 12s ease-in-out infinite alternate;
+        filter: blur(60px);
+    }
+
+    @keyframes pulseGradient {
+        0% {
+            transform: scale(1);
+            opacity: 0.6;
+        }
+        100% {
+            transform: scale(1.1);
+            opacity: 0.9;
+        }
+    }
+
+    .card {
+        background-color: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-container {
+        background-color: rgba(255, 255, 255, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        height: 140px;
+    }
+
+    .small {
+        font-size: 0.8rem;
+    }
+
+    .border-bottom {
+        border-bottom: 1px solid #dee2e6 !important;
+    }
+</style>
+
+<div class="container py-4 position-relative" style="z-index: 1;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Dashboard</h2>
+        <a href="{{ url_for('post_item') }}" class="btn btn-success btn-sm">
+            + Post New Item
+        </a>
+    </div>
+
+    <div class="mb-5">
+        <h4 class="mb-3 border-bottom pb-2">Your Items</h4>
+        <div class="row g-4">
+            {% for item in items %}
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="card h-100 position-relative">
+                    {% if item.claimed %}
+                    <div class="position-absolute top-0 start-0 w-100 bg-success text-white text-center py-1 rounded-top">
+                        CLAIMED
+                    </div>
+                    {% endif %}
+                    {% if item.image_filename %}
+                    <div class="image-container">
+                        <img src="{{ url_for('static', filename='uploads/' + item.image_filename) }}"
+                             class="img-fluid p-2"
+                             alt="{{ item.title }}"
+                             style="max-height: 100%; width: auto;">
+                    </div>
+                    {% endif %}
+                    <div class="card-body p-3 d-flex flex-column">
+                        <h6 class="card-title mb-1">{{ item.title|truncate(25) }}</h6>
+                        <p class="card-text text-muted small mb-2">{{ item.description|truncate(60) }}</p>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="badge bg-secondary small">{{ item.category|capitalize }}</span>
+                            <span class="badge {% if item.item_type == 'lost' %}bg-danger{% else %}bg-success{% endif %} small">
+                                {{ item.item_type|capitalize }}
+                            </span>
+                        </div>
+                        {% if item.claimed %}
+                        <div class="mt-auto small text-success">
+                            Claimed by: {{ item.claimer.username }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer bg-white p-2 border-0">
+                        <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-sm btn-outline-primary w-100">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <div class="alert alert-info py-2 small">
+                    No items posted yet.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div>
+        <h4 class="mb-3 border-bottom pb-2">Messages</h4>
+        <div class="row g-4">
+            {% for item in items %}
+                {% if item.messages and (current_user.id == item.user_id or current_user.id == item.allowed_user_id) %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title d-flex justify-content-between">
+                                {{ item.title|truncate(20) }}
+                                <span class="badge bg-primary small">{{ item.messages|length }} new</span>
+                            </h6>
+                            <a href="{{ url_for('view_messages', item_id=item.id) }}" class="btn btn-sm btn-outline-secondary w-100 mt-2">
+                                View Messages
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+            <div class="col-12">
+                <div class="alert alert-info py-2 small">
+                    No messages available.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
